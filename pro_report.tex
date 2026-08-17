@@ -14,12 +14,19 @@
 \pgfplotsset{compat=1.17}
 \usepackage{microtype}
 
-% Define Professional Editorial Palette
+% Professional Editorial Palette
 \definecolor{navy}{HTML}{1D3557}
 \definecolor{slate}{HTML}{457B9D}
 \definecolor{crimson}{HTML}{E63946}
 \definecolor{lightgray}{HTML}{F8F9FA}
 \definecolor{bordergray}{HTML}{CCCCCC}
+
+% Tighten float spacing to enforce strict 4-page IEEE budget
+\setlength{\textfloatsep}{5pt plus 1.0pt minus 1.0pt}
+\setlength{\floatsep}{4pt plus 1.0pt minus 1.0pt}
+\setlength{\intextsep}{4pt plus 1.0pt minus 1.0pt}
+\setlength{\abovecaptionskip}{2.5pt plus 0.5pt minus 0.5pt}
+\setlength{\belowcaptionskip}{2.5pt plus 0.5pt minus 0.5pt}
 
 \begin{document}
 
@@ -30,29 +37,29 @@
 \author{
 \IEEEauthorblockN{Shubhi Jain}
 \IEEEauthorblockA{\textit{Dept. of Computer Science \& Design} \\
-\textit{Indraprastha Institute of Information Technology}\\
+\textit{IIIT-Delhi}\\
 New Delhi, India}
 \and
 \IEEEauthorblockN{Aarushi Chawla}
 \IEEEauthorblockA{\textit{Dept. of Computer Science \& Design} \\
-\textit{Indraprastha Institute of Information Technology}\\
+\textit{IIIT-Delhi}\\
 New Delhi, India}
 \and
 \IEEEauthorblockN{Amartya Singh}
 \IEEEauthorblockA{\textit{Dept. of Computer Science \& Social Sciences} \\
-\textit{Indraprastha Institute of Information Technology}\\
+\textit{IIIT-Delhi}\\
 New Delhi, India}
 \and
 \IEEEauthorblockN{Harshit Gautam}
-\IEEEauthorblockA{\textit{Dept. of Computer Science \& Artificial Intelligence} \\
-\textit{Indraprastha Institute of Information Technology}\\
+\IEEEauthorblockA{\textit{Dept. of Computer Science \& AI} \\
+\textit{IIIT-Delhi}\\
 New Delhi, India}
 }
 
 \maketitle
 
 \begin{abstract}
-Financial institutions face severe challenges detecting cyber-enabled mule accounts due to high false-alarm rates in static rule engines and an inability to adapt to real-time transaction velocities. This paper presents SentinelFlow , an enterprise-grade, multi-source machine learning orchestration engine engineered to intercept fraudulent fund circulation across retail banking channels. SentinelFlow  ingests real-time core transaction streams, internal Transaction Monitoring System (TMS) alerts, cross-channel customer velocity profiles, and dynamic government cyber fraud feeds. By implementing a dynamic cost-optimal routing engine, eliminating post-hoc administrative leakage, applying PCHIP-smoothed Isotonic probability calibration, and optimizing decisions against an asymmetric financial loss function, SentinelFlow  achieves a 5-fold cross-validated Macro $F_1$-score of 0.9147 and reduces operational review costs by 29.2\%. The prototype features a sub-50ms FastAPI inference gateway, a Redis feature store with persistent write-behind caching, and an enterprise Next.js 14 Security Operations Console with real-time Server-Sent Events (SSE), hardware-accelerated ego-graph rendering, and non-blocking on-demand model retraining.
+Financial institutions face severe operational challenges detecting cyber-enabled mule accounts due to high false-alarm rates in static rule engines and an inability to adapt to real-time transaction velocities. This paper presents SentinelFlow, an enterprise-oriented, multi-source machine learning orchestration engine engineered to intercept fraudulent fund circulation across retail banking channels. SentinelFlow ingests real-time core transaction streams, internal Transaction Monitoring System (TMS) alerts, cross-channel customer velocity profiles, and dynamic government cyber fraud feeds. By implementing a dynamic cost-optimal routing mechanism between deterministic and model-based screening, eliminating post-hoc administrative leakage, applying PCHIP-smoothed Isotonic probability calibration, and optimizing decisions against an asymmetric financial loss function, SentinelFlow achieves an out-of-fold Macro $F_1$-score of 0.9147 (0.9044 under chronological cohort split) and reduces operational review costs by 29.2\% relative to standard symmetric decision policies. Benchmarking demonstrates an end-to-end p99 inference latency of 49.8 ms, maintaining high throughput for real-time transaction screening.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -60,30 +67,35 @@ Mule account detection, financial fraud, probability calibration, cost-sensitive
 \end{IEEEkeywords}
 
 \section{Introduction}
-Mule accounts serve as the primary laundering conduit for cyber-enabled financial fraud, receiving illicit proceeds and rapidly dispersing them across multi-tiered banking networks. Traditional transaction-monitoring systems rely predominantly on rigid, rule-based heuristics. These legacy approaches suffer from two fundamental operational flaws: (i) excessive false-positive rates that overwhelm Security Operations Center (SOC) analysts, and (ii) an inability to ingest external, real-time threat intelligence and cross-channel banking signals dynamically.
+Mule accounts serve as the primary laundering conduit for cyber-enabled financial fraud, receiving illicit proceeds and rapidly dispersing them across multi-tiered banking networks. In this paper, we define \textit{mule account detection} as the primary binary classification task, where \textit{fraud} represents the positive class ($y = 1$), and \textit{transaction intervention} represents the downstream operational mitigation action.
 
-To address the Phase 2 requirements of the Cybershield Hackathon 2026, we introduce \textbf{SentinelFlow }. This solution transitions from static, single-channel classification to a high-throughput, multi-source orchestration platform. SentinelFlow  is designed around five core pillars:
-\begin{itemize}
-    \item \textbf{4-Stream Ingestion Architecture:} Synthesizing transaction streams, internal TMS alerts, cross-channel velocity profiles (UPI, ATM, Net Banking), and government cyber fraud feeds.
-    \item \textbf{Dynamic Ingestion Economics:} Dynamically routing transactions between deterministic blacklist queries and ML inference based on computational costs ($C_{\text{search}}$ vs. $C_{\text{inference}}$).
-    \item \textbf{Zero-Leakage Behavioral Engine:} Neutralizing post-hoc administrative status flags and mapping time-invariant cyclical temporal coordinates.
-    \item \textbf{Calibrated Asymmetric Optimization:} Generating empirical fraud probabilities via PCHIP-smoothed Isotonic Regression and minimizing financial loss via asymmetric cost-sensitive thresholding.
-    \item \textbf{Human-in-the-Loop (HITL) Console:} Providing local explainability via Taylor-scaled TreeSHAP reason codes, dynamic ego-graph network visualization, and an on-demand retraining model registry.
-\end{itemize}
+Traditional transaction-monitoring systems rely predominantly on rigid, rule-based heuristics. These legacy approaches suffer from two fundamental operational flaws: (i) excessive false-positive rates that overwhelm Security Operations Center (SOC) analysts, and (ii) an inability to ingest external threat intelligence and cross-channel banking signals dynamically.
+
+To address the Phase 2 requirements of the Cybershield Hackathon 2026, we introduce \textbf{SentinelFlow}. Rather than proposing entirely new learning algorithms, SentinelFlow’s primary contribution lies in the novel \textbf{orchestration and integration} of multi-source threat streams, runtime cost-aware routing economics, leakage-audited behavioral features, and calibrated decision layers into an end-to-end risk management platform.
+
+\subsection{Key Contributions}
+The main contributions of this work are summarized as follows:
+\begin{enumerate}
+    \item \textbf{4-Stream Ingestion Architecture:} An integrated multi-source ingestion gateway fusing core transactions, legacy TMS rule alerts, cross-channel velocity states, and government threat feeds.
+    \item \textbf{Cost-Optimal Runtime Routing:} A dynamic routing framework switching between deterministic firewall lookups and ML inference based on computational costs ($C_{\text{search}}$ vs. $C_{\text{inference}}$).
+    \item \textbf{Leakage-Audited Behavioral Engine:} An audit identifying and eliminating post-hoc administrative status flags, paired with an anchor-free temporal feature representation.
+    \item \textbf{Calibrated Asymmetric Economic Layer:} A decision module combining PCHIP-smoothed Isotonic calibration with an asymmetric financial loss function that reduces bank operating costs by 29.2\%.
+    \item \textbf{Interactive HITL Prototype:} A decoupled microservices implementation featuring auditable TreeSHAP reason codes, local ego-graph network visualization, and an on-demand model retraining registry.
+\end{enumerate}
 
 \section{System Architecture \& Dynamic Ingestion Economics}
 
 \subsection{Multi-Source Data Ingestion}
-SentinelFlow  ingests four distinct, asynchronous data streams:
+SentinelFlow ingests four distinct, asynchronous data streams:
 \begin{enumerate}
     \item \textbf{Core Transaction Stream:} Ingests live JSON payloads containing transfer amounts, beneficiary routing tokens, and channel IDs.
-    \item \textbf{Internal TMS \& Fraud Alert Stream:} Ingests legacy rule trips (e.g., rapid velocity limits, off-hour logins) to fuse historical monitoring context.
+    \item \textbf{Internal TMS \& Fraud Alert Stream:} Ingests legacy rule trips (e.g., rapid velocity limits, off-hour logins) to fuse historical context.
     \item \textbf{Cross-Channel Profile Store:} Aggregates in-memory customer velocity metrics across UPI, ATM, and Net Banking to detect bursty cross-interface draining.
     \item \textbf{Government Cyber Threat Feed:} Ingests simulated national cybercrime tickets (NCRP/I4C) and regulatory blacklists (flagged IP subnets, suspect hashes, and blacklisted accounts).
 \end{enumerate}
 
 \subsection{Cost-Optimal Runtime Routing Mechanics}
-In high-volume banking architectures, querying a distributed external blacklist incurs latency and network API expenses ($C_{\text{search}}$), while executing local gradient-boosted tree ensembles consumes server CPU cycles ($C_{\text{inference}}$). SentinelFlow  formalizes this routing decision dynamically:
+In high-volume banking architectures, querying a distributed external blacklist incurs latency and network API expenses ($C_{\text{search}}$), while executing local gradient-boosted tree ensembles consumes server CPU cycles ($C_{\text{inference}}$). SentinelFlow formalizes this routing decision dynamically:
 \begin{equation}
 \text{Path} = \begin{cases} 
 \text{Route B (Firewall First)}, & \text{if } P(\text{Match}) \cdot C_{\text{fraud}} > C_{\text{search}} \\
@@ -95,29 +107,29 @@ Under Route A, transactions with low behavioral risk bypass external blacklist l
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[node distance=0.7cm, auto, >=stealth, thick, every node/.style={scale=0.70, font=\small}]
+\begin{tikzpicture}[node distance=0.55cm, auto, >=stealth, thick, every node/.style={scale=0.68, font=\small}]
 % Ingestion Layer
-\node[draw=navy, rectangle, rounded corners, fill=lightgray, text width=1.5cm, align=center] (stream) {Core Tx\\Stream};
-\node[draw=navy, rectangle, rounded corners, fill=lightgray, right=0.2cm of stream, text width=1.5cm, align=center] (tms) {Internal TMS\\Alerts};
-\node[draw=navy, rectangle, rounded corners, fill=lightgray, right=0.2cm of tms, text width=1.5cm, align=center] (cross) {Cross-Channel\\(Redis)};
-\node[draw=navy, rectangle, rounded corners, fill=lightgray, right=0.2cm of cross, text width=1.5cm, align=center] (govt) {Govt Cyber\\Feeds};
+\node[draw=navy, rectangle, rounded corners, fill=lightgray, text width=1.45cm, align=center] (stream) {Core Tx\\Stream};
+\node[draw=navy, rectangle, rounded corners, fill=lightgray, right=0.15cm of stream, text width=1.45cm, align=center] (tms) {Internal TMS\\Alerts};
+\node[draw=navy, rectangle, rounded corners, fill=lightgray, right=0.15cm of tms, text width=1.45cm, align=center] (cross) {Cross-Channel\\(Redis)};
+\node[draw=navy, rectangle, rounded corners, fill=lightgray, right=0.15cm of cross, text width=1.45cm, align=center] (govt) {Govt Cyber\\Feeds};
 
 % Ingestion Gateway
-\node[draw=navy, rectangle, rounded corners, fill=slate!15, below=0.5cm of cross, xshift=-0.9cm, text width=7.2cm, align=center, minimum height=0.5cm] (gateway) {\textbf{Multi-Source Ingestion \& Parsing Gateway}};
+\node[draw=navy, rectangle, rounded corners, fill=slate!15, below=0.4cm of cross, xshift=-0.8cm, text width=7.1cm, align=center, minimum height=0.45cm] (gateway) {\textbf{Multi-Source Ingestion \& Parsing Gateway}};
 
 % Routing Switch
-\node[draw=navy, rectangle, rounded corners, fill=white, below=0.5cm of gateway, text width=6.6cm, align=center] (router) {\textbf{Cost-Optimal Routing Engine}\\($C_{\text{search}}$ vs. $C_{\text{inference}}$)};
+\node[draw=navy, rectangle, rounded corners, fill=white, below=0.4cm of gateway, text width=6.5cm, align=center] (router) {\textbf{Cost-Optimal Routing Engine}\\($C_{\text{search}}$ vs. $C_{\text{inference}}$)};
 
 % Decision Engines
-\node[draw=bordergray, rectangle, rounded corners, fill=lightgray, below left=0.5cm and -1.7cm of router, text width=3.2cm, align=center] (firewall) {Route B: Deterministic\\Firewall (Blacklists)};
-\node[draw=bordergray, rectangle, rounded corners, fill=lightgray, below right=0.5cm and -1.7cm of router, text width=3.2cm, align=center] (ensemble) {Route A: Calibrated\\GBDT Ensemble};
+\node[draw=bordergray, rectangle, rounded corners, fill=lightgray, below left=0.4cm and -1.6cm of router, text width=3.1cm, align=center] (firewall) {Route B: Deterministic\\Firewall (Blacklists)};
+\node[draw=bordergray, rectangle, rounded corners, fill=lightgray, below right=0.4cm and -1.6cm of router, text width=3.1cm, align=center] (ensemble) {Route A: Calibrated\\GBDT Ensemble};
 
 % Decision & Prevention
-\node[draw=navy, rectangle, rounded corners, fill=slate!15, below=1.8cm of router, text width=7.2cm, align=center] (prevention) {\textbf{Asymmetric Cost Optimization \&\\[-1pt]Prevention Engine}};
+\node[draw=navy, rectangle, rounded corners, fill=slate!15, below=1.55cm of router, text width=7.1cm, align=center] (prevention) {\textbf{Asymmetric Cost Optimization \& Prevention Engine}};
 
 % Outputs
-\node[draw=navy, rectangle, rounded corners, fill=white, below left=0.5cm and -1.5cm of prevention, text width=3.2cm, align=center] (queue) {Operational Alert Queue\\(HITL + TreeSHAP)};
-\node[draw=crimson, rectangle, rounded corners, fill=crimson!10, below right=0.5cm and -1.5cm of prevention, text width=3.2cm, align=center] (webhook) {\textbf{Escrow Webhook}\\(15-min Outbound Hold)};
+\node[draw=navy, rectangle, rounded corners, fill=white, below left=0.4cm and -1.5cm of prevention, text width=3.1cm, align=center] (queue) {Operational Alert Queue\\(HITL + TreeSHAP)};
+\node[draw=crimson, rectangle, rounded corners, fill=crimson!10, below right=0.4cm and -1.5cm of prevention, text width=3.1cm, align=center] (webhook) {\textbf{Escrow Webhook}\\(15-min Outbound Hold)};
 
 % Connections
 \draw[->, slate] (stream) -- (gateway);
@@ -132,24 +144,24 @@ Under Route A, transactions with low behavioral risk bypass external blacklist l
 \draw[->, navy] (prevention.south) -| (queue.north);
 \draw[->, crimson, very thick] (prevention.south) -| (webhook.north);
 \end{tikzpicture}
-\caption{SentinelFlow  multi-source architecture showing cost-optimal dynamic routing, decision engines, and active prevention triggers.}
+\caption{SentinelFlow multi-source architecture showing cost-optimal dynamic routing, decision engines, and active prevention triggers.}
 \label{fig:arch}
 \end{figure}
 
 \subsection{Active Prevention Controller}
-When an incoming transaction breaches the calibrated cost-optimal risk threshold, SentinelFlow  fires an automated \textbf{Outbound Escrow Webhook}, placing an immediate 15-minute hold on outbound fund movements and alerting downstream institutions to stop circulation.
+When an incoming transaction breaches the calibrated cost-optimal risk threshold, SentinelFlow triggers an automated \textbf{Outbound Escrow Webhook}, placing an immediate 15-minute hold on outbound fund movements and alerting downstream institutions to stop circulation.
 
 \section{Behavioral Feature Engineering \& Leakage Elimination}
 
 \subsection{System Auditing \& Post-Hoc Data Leakage Prevention}
-In financial fraud datasets, retrospective flags frequently introduce severe target leakage. SentinelFlow  systematically isolated and excluded four purely administrative features while salvaging two critical compliance features as behavioral lag indicators:
+In financial fraud datasets, retrospective flags frequently introduce severe target leakage. SentinelFlow systematically isolated and excluded four purely administrative features while salvaging two critical compliance features as behavioral lag indicators:
 
 \begin{table}[h]
 \centering
 \caption{Feature Audit Directory and Provenance Action}
 \label{tab:audit}
 \footnotesize
-\begin{tabularx}{\columnwidth}{l p{2.8cm} X}
+\begin{tabularx}{\columnwidth}{l p{2.7cm} X}
 \toprule
 \textbf{Feature} & \textbf{Audit Signature} & \textbf{Engineering Action} \\ \midrule
 \texttt{F3912} & $d = 8.77$, Corr $= 0.97$ & Excluded (Target Proxy) \\
@@ -162,13 +174,13 @@ In financial fraud datasets, retrospective flags frequently introduce severe tar
 \end{table}
 
 \subsection{High-Density Feature Synthesis}
-From an initial sparse space of $\sim3{,}925$ raw features, SentinelFlow  extracts a dense matrix of 105 real-time indicators across six distinct tracks:
+From an initial sparse space of $\sim3{,}925$ raw features, SentinelFlow extracts a dense matrix of 105 real-time indicators across six distinct tracks:
 \begin{itemize}
-    \item \textbf{Statistical Moments:} 14 NumPy-optimized summary moments (\texttt{row\_mean}, \texttt{row\_std}, \texttt{row\_zero\_rate}, \texttt{row\_iqr}) measuring transaction volatility.
-    \item \textbf{Missingness Gaps:} Explicit binary indicators tracking the top 25 features where class-conditional missingness gaps exceeded 20\%.
+    \item \textbf{Statistical Moments:} 14 summary moments (\texttt{row\_mean}, \texttt{row\_std}, \texttt{row\_zero\_rate}, \texttt{row\_iqr}) measuring transaction volatility.
+    \item \textbf{Missingness Gaps:} Binary indicators tracking the top 25 features where class-conditional missingness gaps exceeded 20\%.
     \item \textbf{Non-Destructive Categoricals:} Ordinal encoding for low-cardinality features ($\le 12$) and fold-safe Laplace-smoothed target encoding for high-cardinality hashes.
-    \item \textbf{Cyclical Temporal Projections:} Analysis of \texttt{F3888} revealed it to be an account registration date spanning 126 years (1900--2025). The drifting continuous \texttt{elapsed\_days} feature was removed and replaced with bounded sine/cosine projections of registration day-of-week and month.
-    \item \textbf{Unsupervised Anomaly Score:} An Isolation Forest trained exclusively on normal (non-mule) accounts outputs a continuous structural outlier coordinate.
+    \item \textbf{Cyclical Temporal Projections:} \texttt{F3888} is an account registration date spanning 126 years (1900--2025). The continuous \texttt{elapsed\_days} feature was removed and replaced with bounded sine/cosine projections of registration day-of-week and month.
+    \item \textbf{Unsupervised Anomaly Score:} An Isolation Forest trained on normal (non-mule) accounts outputs a structural outlier coordinate.
     \item \textbf{Cross-Channel Velocity \& Ego-Graph Topology:} We formalize the cross-channel disbursement velocity ratio:
     \begin{equation}
     V_{\text{cross}} = \frac{\sum \text{Outbound ATM \& IMPS Volume}_{(t - 1\text{h})}}{\sum \text{Inbound UPI Volume}_{(t - 1\text{h})} + \epsilon}
@@ -180,7 +192,7 @@ From an initial sparse space of $\sim3{,}925$ raw features, SentinelFlow  extrac
 \section{Calibrated Modeling \& Explainability Framework}
 
 \subsection{Dual-Engine Ensemble}
-SentinelFlow  employs a soft-voting probability blend:
+SentinelFlow employs a soft-voting probability blend:
 \begin{equation}
 P_{\text{blend}} = 0.6 \cdot P_{\text{XGBoost}} + 0.4 \cdot P_{\text{LightGBM}}
 \label{eq:blend}
@@ -191,7 +203,7 @@ Both Gradient Boosted Decision Tree (GBDT) implementations natively handle spars
 To avoid injecting synthetic noise, SMOTE oversampling was eliminated in favor of direct algorithmic loss-gradient scaling (\texttt{scale\_pos\_weight}) during tree construction.
 
 \subsection{Isotonic Probability Calibration with PCHIP Smoothing}
-Raw ensemble scores are distorted by gradient weighting. SentinelFlow  fits an Isotonic Regression model on training-fold outputs to calibrate probabilities. 
+Raw ensemble scores are distorted by gradient weighting. SentinelFlow fits an Isotonic Regression model on training-fold outputs to calibrate probabilities. 
 
 To resolve the zero/infinite derivative problem of step-functions, we fit a \textbf{Piecewise Cubic Hermite Interpolating Polynomial (PCHIP)} over the step vertices. PCHIP guarantees strict monotonicity ($f'(x) > 0$), ensuring a continuous, strictly positive derivative across $[0, 1]$.
 
@@ -202,7 +214,7 @@ To resolve the zero/infinite derivative problem of step-functions, we fit a \tex
     xlabel={Raw Ensemble Score},
     ylabel={Calibrated Probability},
     xmin=0, xmax=1, ymin=0, ymax=1,
-    grid=major, width=7.2cm, height=4.4cm,
+    grid=major, width=7.0cm, height=3.8cm,
     legend pos=north west,
     every axis plot/.append style={thick}
 ]
@@ -216,17 +228,17 @@ To resolve the zero/infinite derivative problem of step-functions, we fit a \tex
 \end{figure}
 
 \subsection{Regulatory Explainability via Calibrated TreeSHAP}
-To satisfy legal compliance mandates, TreeSHAP decomposes raw tree log-odds into local feature attributions. We apply a first-order Taylor series scaling correction, multiplying raw attributions by the local PCHIP derivative:
+To support compliance, TreeSHAP decomposes raw tree log-odds into local feature attributions. We apply a first-order Taylor series scaling correction, multiplying raw attributions by the local PCHIP derivative:
 \begin{equation}
 \phi_{i}^{\text{calibrated}} = \phi_{i}^{\text{raw}} \cdot \left. \frac{df_{\text{PCHIP}}(z)}{dz} \right|_{z = P_{\text{blend}}}
 \label{eq:shap}
 \end{equation}
-To ensure the sub-50ms SLA, TreeSHAP is executed conditionally on the high-risk alert tail ($\sim1\%$ of volume).
+This produces auditable reason codes designed to support regulatory explainability. To preserve the sub-50ms SLA, TreeSHAP is executed conditionally on the high-risk alert tail ($\sim1\%$ of volume).
 
 \section{Asymmetric Economic Optimization \& Empirical Validation}
 
 \subsection{Economic Cost Formulation}
-Traditional $F_1$-score maximization assumes symmetric error costs ($C_{\text{FN}} = C_{\text{FP}}$). SentinelFlow  minimizes the total economic operational cost:
+Traditional $F_1$-score maximization assumes symmetric error costs ($C_{\text{FN}} = C_{\text{FP}}$). SentinelFlow minimizes the total economic operational cost:
 \begin{equation}
 \text{Total Cost} = FN \cdot (C_{\text{ratio}} \cdot C_{\text{FP}}) + FP \cdot C_{\text{FP}}
 \label{eq:cost}
@@ -240,7 +252,7 @@ where $C_{\text{ratio}} = \texttt{COST\_FN\_RATIO}$ and $C_{\text{FP}} = \texttt
 \begin{tikzpicture}
 \begin{axis}[
     xlabel={Threshold}, ylabel={Total Cost (\$)},
-    grid=major, width=4.2cm, height=3.4cm,
+    grid=major, width=4.1cm, height=3.0cm,
     every axis plot/.append style={thick}
 ]
 \addplot[smooth, crimson] coordinates {(0,3000) (0.1,1800) (0.2,1200) (0.32,1100) (0.4,1300) (0.5,1600) (0.6,2000)};
@@ -253,7 +265,7 @@ where $C_{\text{ratio}} = \texttt{COST\_FN\_RATIO}$ and $C_{\text{FP}} = \texttt
 \begin{tikzpicture}
 \begin{axis}[
     xlabel={Threshold}, ylabel={$F_1$-Score},
-    grid=major, width=4.2cm, height=3.4cm,
+    grid=major, width=4.1cm, height=3.0cm,
     every axis plot/.append style={thick}
 ]
 \addplot[smooth, slate] coordinates {(0,0.1) (0.1,0.3) (0.2,0.55) (0.32,0.62) (0.4,0.58) (0.5,0.5) (0.6,0.4)};
@@ -266,7 +278,7 @@ where $C_{\text{ratio}} = \texttt{COST\_FN\_RATIO}$ and $C_{\text{FP}} = \texttt
 \end{figure}
 
 \subsection{Cross-Validation \& Temporal Generalization Results}
-SentinelFlow  was validated using a 5-fold Stratified Cross-Validation loop and an out-of-fold chronological rolling window ordered by account registration date:
+SentinelFlow was validated using a 5-fold Stratified Cross-Validation loop alongside an out-of-fold chronological rolling window ordered by account registration date:
 
 \begin{table}[h]
 \centering
@@ -285,6 +297,8 @@ Operational Cost Savings & $\mathbf{29.2\%}$ & $\mathbf{29.2\%}$ \\ \bottomrule
 \end{tabularx}
 \end{table}
 
+As shown in Table \ref{tab:results}, the proposed asymmetric cost-optimized decision threshold reduced the measured total operational cost by \textbf{29.2\% relative to the standard symmetric $F_1$-optimal baseline policy}. Furthermore, the chronological evaluation exhibits a robust Macro $F_1$-score of 0.9044, confirming that the anchor-free temporal feature representation effectively resists concept drift when evaluated on unseen future account cohorts.
+
 \subsection{Ablation Study: Iterative Architectural Impact}
 Table \ref{tab:ablation} details the empirical impact of each engineering phase, demonstrating the progressive elimination of leakage and calibration uplift.
 
@@ -300,7 +314,7 @@ Phase 1 Baseline & Raw Matrix + Logistic Reg. & 0.0295 & 0.4832 \\
 Phase 1 GBDT & XGBoost + Full Imputation & 0.8090 & 0.8968 \\
 Phase 2 Audited & Leak Excluded + 105 Features & 0.8323 & 0.9044 \\
 Phase 2 Ensemble & Calibrated Blend (PCHIP) & 0.8677 & 0.9147 \\
-SentinelFlow  & Asymmetric Cost Optimization & $\mathbf{0.8677}$ & $\mathbf{0.9147}$ \\ \bottomrule
+SentinelFlow & Asymmetric Cost Optimization & $\mathbf{0.8677}$ & $\mathbf{0.9147}$ \\ \bottomrule
 \end{tabularx}
 \end{table}
 
@@ -318,10 +332,13 @@ The prototype is implemented using a decoupled microservices architecture contai
 The frontend is built on Next.js 14 (React) and Tailwind CSS, interfacing with FastAPI via Server-Sent Events (SSE):
 \begin{itemize}
     \item \textbf{Real-Time Transaction Feed:} A virtualized alert table (\texttt{react-virtuoso}) displaying live calibrated risk probabilities without UI thread lag.
-    \item \textbf{Hardware-Accelerated Ego-Graph Visualizer:} A WebGL/Canvas dynamic network graph (\texttt{react-force-graph-2d}) displaying real-time 1-hop and 2-hop fund circulation.
-    \item \textbf{Regulatory Explainability Console:} Visualizes Taylor-scaled TreeSHAP local attributions, generating legally defensible reason codes for SOC officers.
+    \item \textbf{Hardware-Accelerated Ego-Graph Visualizer:} A WebGL dynamic network graph (\texttt{react-force-graph-2d}) displaying real-time 1-hop and 2-hop fund circulation.
+    \item \textbf{Regulatory Explainability Console:} Visualizes Taylor-scaled TreeSHAP local attributions, generating auditable reason codes for SOC officers.
     \item \textbf{On-Demand Retraining Panel:} Allows analysts to toggle feature sets, submit custom hyperparameter payloads, and monitor retraining progress in real time via an SSE event stream.
 \end{itemize}
+
+\subsection{Micro-Latency SLA Benchmark}
+Table \ref{tab:latency} summarizes benchmark results across $N = 10{,}000$ sequential transactions under single-threaded execution. Crucially, even with conditional TreeSHAP attribution computed on high-risk alerts, the end-to-end $\text{p99}$ latency remains at \textbf{49.8 ms}, safely satisfying the sub-50ms operational SLA.
 
 \begin{table}[h]
 \centering
@@ -340,8 +357,18 @@ Conditional TreeSHAP Attribution & 18.4 & 24.1 \\ \midrule
 \end{tabularx}
 \end{table}
 
+\section{Limitations and Future Work}
+While SentinelFlow exhibits strong empirical performance, several operational constraints of the prototype warrant discussion:
+\begin{enumerate}
+    \item \textit{Simulated Threat Feeds:} Government cyber fraud feeds and bank-to-bank webhooks were evaluated using simulated threat feeds rather than live production NCRP/I4C endpoints.
+    \item \textit{Core Banking Integration:} The prototype evaluates latency on independent containerized services; integration with legacy mainframe core banking systems may introduce additional network overhead.
+    \item \textit{Intervention Mechanism Scope:} The 15-minute escrow hold represents an illustrative automated control mechanism; live deployment requires jurisdiction-specific regulatory clearing approvals.
+    \item \textit{Throughput Scale:} Benchmark testing established sub-50ms latency across $N = 10{,}000$ transactions. Future work will benchmark distributed load balancing across higher transactional volumes ($>10{,}000\text{ TPS}$).
+    \item \textit{Temporal Granularity:} The chronological split evaluated cohort drift based on account registration dates. Future studies will explore finer-grained transaction timestamp logging once available.
+\end{enumerate}
+
 \section{Conclusion}
-SentinelFlow  delivers a production-ready, economically optimized machine learning orchestration system for real-time mule account intervention. By resolving target leakage, anchoring temporal features to time-invariant cycles, calibrating ensemble probabilities, and optimizing decisions against real-world bank loss functions, the platform bridges the gap between theoretical data science and enterprise banking security.
+SentinelFlow demonstrates a production-oriented, economically optimized machine learning orchestration system for real-time mule account intervention. By resolving target leakage, anchoring temporal features to time-invariant cycles, calibrating ensemble probabilities, and optimizing decisions against real-world bank loss functions, the platform bridges the gap between theoretical data science and enterprise banking security.
 
 \section*{Acknowledgment}
 The authors thank the organizers of the Cybershield Hackathon 2026, Bank of India, and IIT Hyderabad for providing the problem framework and dataset.
