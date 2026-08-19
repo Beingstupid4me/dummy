@@ -1,3 +1,5 @@
 [20/08, 12:24 am] Amartya Singh: attachment of the column description of Problem statement 2 Dataset. Please use this to fine tune your model.
 [20/08, 12:24 am] Amartya Singh: Each team will be allotted 15 minutes for their presentation, followed by a short Q&A session with the judges.
 [20/08, 12:24 am] Amartya Singh: "Developing a solution having AI/ML capabilities for detecting suspicious transactions and mule accounts by ingesting financial transactions and/or fraud monitoring solution alerts and/or Transaction monitoring system alerts and govt cyber fraud alerts/tickets and preventing circulation of fraudulent proceeds through mule accounts. This solution should consume real-time regulatory inputs/ feeds and cross-channel bank data."
+
+https://boihackathon.cse.iith.ac.in/hackathon2026/hackathonReg/newReg/#
