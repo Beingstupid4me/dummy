@@ -1,0 +1,16 @@
+{
+  "bundle": "C:\\Users\\amartya.singh\\Code\\dummy\\Phase_1_stable\\models\\phase1_final.joblib",
+  "cost_threshold": 0.08,
+  "n_features": 157,
+  "confirmed_leaky": [
+    "F3912",
+    "F2230"
+  ],
+  "metrics": {
+    "fold": "production-export",
+    "n_features": 157,
+    "note": "Not a reported score. Quote step5-window mean / future-core.",
+    "reported_step5_mean_pr_auc": 0.7381353762363377,
+    "reported_future_core_pr_auc": 0.7625230223155623
+  }
+}

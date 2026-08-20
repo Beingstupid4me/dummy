@@ -1,0 +1,50 @@
+{
+  "audit": [
+    {
+      "feature": "F3912",
+      "retest_leaky": true,
+      "abs_corr": 0.9690659702864182,
+      "cohen_d": 8.77041372136975,
+      "reason": "numeric near-copy of label"
+    },
+    {
+      "feature": "F2230",
+      "retest_leaky": true,
+      "abs_corr": NaN,
+      "cohen_d": NaN,
+      "reason": "pure-positive ['Sep25', 'Nov25']"
+    },
+    {
+      "feature": "F3886",
+      "retest_leaky": false,
+      "abs_corr": NaN,
+      "cohen_d": NaN,
+      "reason": "keep (rare-event zeros are not leaks)"
+    },
+    {
+      "feature": "F3889",
+      "retest_leaky": false,
+      "abs_corr": NaN,
+      "cohen_d": NaN,
+      "reason": "keep (rare-event zeros are not leaks)"
+    },
+    {
+      "feature": "F3891",
+      "retest_leaky": false,
+      "abs_corr": NaN,
+      "cohen_d": NaN,
+      "reason": "keep (rare-event zeros are not leaks)"
+    },
+    {
+      "feature": "F3892",
+      "retest_leaky": false,
+      "abs_corr": NaN,
+      "cohen_d": NaN,
+      "reason": "keep (rare-event zeros are not leaks)"
+    }
+  ],
+  "confirmed_leaky": [
+    "F3912",
+    "F2230"
+  ]
+}

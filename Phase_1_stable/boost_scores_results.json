@@ -1,0 +1,76 @@
+{
+  "rows": [
+    {
+      "fold": 0,
+      "val_mules": 16,
+      "pr_auc": 0.7549871623007487,
+      "roc_auc": 0.8961111111111111,
+      "minority_f1_nested": 0.7333333333333333,
+      "macro_f1_nested": 0.8655561724967611,
+      "minority_f1_matched": 0.7692307692307693,
+      "macro_f1_matched": 0.8837834378599769,
+      "nested_thr": 0.013306228515557123,
+      "matched_thr": 0.4455074294215978
+    },
+    {
+      "fold": 1,
+      "val_mules": 16,
+      "pr_auc": 0.7958200657312854,
+      "roc_auc": 0.9021875000000001,
+      "minority_f1_nested": 0.7586206896551724,
+      "macro_f1_nested": 0.8783389321159569,
+      "minority_f1_matched": 0.7692307692307693,
+      "macro_f1_matched": 0.8837834378599769,
+      "nested_thr": 0.01198372869435661,
+      "matched_thr": 0.23077481139513675
+    },
+    {
+      "fold": 2,
+      "val_mules": 13,
+      "pr_auc": 0.7863646195871622,
+      "roc_auc": 0.8869832330730834,
+      "minority_f1_nested": 0.26666666666666666,
+      "macro_f1_nested": 0.6318127361533499,
+      "minority_f1_matched": 0.782608695652174,
+      "macro_f1_matched": 0.8906116351632996,
+      "nested_thr": 0.9995836205768089,
+      "matched_thr": 0.07295226388523306
+    },
+    {
+      "fold": 3,
+      "val_mules": 9,
+      "pr_auc": 0.6795358167262009,
+      "roc_auc": 0.8350634371395618,
+      "minority_f1_nested": 0.0,
+      "macro_f1_nested": 0.49844774060020697,
+      "minority_f1_matched": 0.7058823529411765,
+      "macro_f1_matched": 0.8520764237898549,
+      "nested_thr": 0.999730927507052,
+      "matched_thr": 0.0042290279123237805
+    },
+    {
+      "fold": 4,
+      "val_mules": 3,
+      "pr_auc": 0.6690590111642742,
+      "roc_auc": 0.8728553921568628,
+      "minority_f1_nested": 0.3333333333333333,
+      "macro_f1_nested": 0.6648233486943165,
+      "minority_f1_matched": 0.5,
+      "macro_f1_matched": 0.7495408631772268,
+      "nested_thr": 0.007822975067634887,
+      "matched_thr": 0.9996199949711466
+    }
+  ],
+  "means": {
+    "fold": 2.0,
+    "val_mules": 11.4,
+    "pr_auc": 0.7371533351019343,
+    "roc_auc": 0.8786401346961238,
+    "minority_f1_nested": 0.4183908045977011,
+    "macro_f1_nested": 0.7077957860121182,
+    "minority_f1_matched": 0.7053905174109778,
+    "macro_f1_matched": 0.8519591595700671,
+    "nested_thr": 0.4064854960722819,
+    "matched_thr": 0.3506167055170876
+  }
+}

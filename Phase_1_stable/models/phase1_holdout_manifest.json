@@ -1,0 +1,28 @@
+{
+  "bundle": "C:\\Users\\amartya.singh\\Code\\dummy\\Phase_1_stable\\models\\phase1_holdout.joblib",
+  "cost_threshold": 0.08,
+  "n_features": 157,
+  "confirmed_leaky": [
+    "F3912",
+    "F2230"
+  ],
+  "metrics": {
+    "fold": "future-core",
+    "n_features": 157,
+    "pr_auc": 0.7625230223155623,
+    "roc_auc": 0.9051106824052577,
+    "macro_f1": 0.8738888888888889,
+    "minority_f1": 0.75,
+    "macro_f1_nested": 0.9130992372256836,
+    "minority_f1_nested": 0.8275862068965517,
+    "balanced_acc": 0.8521073799169474,
+    "cost_thr": 0.08,
+    "f1_thr": 0.08,
+    "total_cost_cost_opt": 25.0,
+    "fn": 5,
+    "fp": 0,
+    "tp": 12,
+    "train_frauds": 63,
+    "test_frauds": 17
+  }
+}
