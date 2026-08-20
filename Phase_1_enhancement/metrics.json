@@ -1,0 +1,101 @@
+{
+  "protocol": "step5 chronological rolling windows (F3888)",
+  "baseline_stable_pr_auc": 0.7381,
+  "ps2_chrono_pr_auc": 0.7097,
+  "winner": "dict_channels_no_tms",
+  "results": [
+    {
+      "label": "dict_channels_no_tms",
+      "rows": [
+        {
+          "fold": 0,
+          "val_mules": 16,
+          "pr_auc": 0.7425329823421046,
+          "pr_auc_cal": 0.6902533039647577,
+          "roc_auc": 0.9040972222222222,
+          "macro_f1": 0.8837834378599769,
+          "minority_f1": 0.7692307692307693,
+          "n_features": 166,
+          "threshold": 0.08,
+          "pr_auc_raw": 0.7425329823421046,
+          "roc_auc_raw": 0.9040972222222222
+        },
+        {
+          "fold": 1,
+          "val_mules": 16,
+          "pr_auc": 0.7743418270779568,
+          "pr_auc_cal": 0.6902533039647577,
+          "roc_auc": 0.8987847222222223,
+          "macro_f1": 0.8590296645411699,
+          "minority_f1": 0.72,
+          "n_features": 166,
+          "threshold": 0.08,
+          "pr_auc_raw": 0.7743418270779568,
+          "roc_auc_raw": 0.8987847222222223
+        },
+        {
+          "fold": 2,
+          "val_mules": 13,
+          "pr_auc": 0.783380020362889,
+          "pr_auc_cal": 0.6945103354794985,
+          "roc_auc": 0.872776142326891,
+          "macro_f1": 0.8802600519576427,
+          "minority_f1": 0.7619047619047619,
+          "n_features": 166,
+          "threshold": 0.08,
+          "pr_auc_raw": 0.783380020362889,
+          "roc_auc_raw": 0.872776142326891
+        },
+        {
+          "fold": 3,
+          "val_mules": 9,
+          "pr_auc": 0.6613583474391579,
+          "pr_auc_cal": 0.5583065871924194,
+          "roc_auc": 0.8227604767397155,
+          "macro_f1": 0.8564517721394017,
+          "minority_f1": 0.7142857142857143,
+          "n_features": 166,
+          "threshold": 0.08,
+          "pr_auc_raw": 0.6613583474391579,
+          "roc_auc_raw": 0.8227604767397155
+        },
+        {
+          "fold": 4,
+          "val_mules": 3,
+          "pr_auc": 0.6688888888888889,
+          "pr_auc_cal": 0.6675832569508096,
+          "roc_auc": 0.8630514705882353,
+          "macro_f1": 0.8997703261368857,
+          "minority_f1": 0.8,
+          "n_features": 166,
+          "threshold": 0.08,
+          "pr_auc_raw": 0.6688888888888889,
+          "roc_auc_raw": 0.8630514705882353
+        }
+      ],
+      "mean": {
+        "pr_auc": 0.7261004132221995,
+        "roc_auc": 0.8722940068198574,
+        "macro_f1": 0.8758590505270153,
+        "minority_f1": 0.7530842490842492
+      }
+    }
+  ],
+  "future_core": {
+    "pr_auc": 0.7660433253465484,
+    "pr_auc_cal": 0.7086356569059342,
+    "roc_auc": 0.9139718144066965,
+    "macro_f1": 0.8920247344220706,
+    "minority_f1": 0.7857142857142857,
+    "n_features": 186,
+    "threshold": 0.08
+  },
+  "beats_ps2": true,
+  "beats_stable": false,
+  "notes": [
+    "Does not edit Phase_1_stable.",
+    "Confirmed leaks F3912/F2230 and resolution flags F3913-F3915 stay out of the clean spec.",
+    "Dictionary tracks: V_cross, V_pos, V_net, V_cash, channel entropy, L7-L31 burst, UPI imbalance.",
+    "Quote raw-blend PR-AUC (same as locked baseline). PCHIP is the probability map."
+  ]
+}

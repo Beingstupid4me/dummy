@@ -1,0 +1,23 @@
+{
+  "protocol": "step5 chronological rolling windows (F3888) — same as Phase_1_stable and PS2 0.7097",
+  "ps2_chrono_pr_auc": 0.7097,
+  "phase1_stable_pr_auc": 0.7381,
+  "best_honest_mean_pr_auc": 0.7324,
+  "exported_future_core_pr_auc": 0.7660,
+  "phase1_stable_future_core_pr_auc": 0.7625,
+  "exported_bundle_mean_pr_auc": 0.7261,
+  "beats_ps2": true,
+  "beats_stable": false,
+  "leaks_blocked": [
+    "F3912 FRAUD_SUSPECTED",
+    "F2230 MNTH — pandas parsed Sep25/Nov25 as dates; cyclical encoding of that column yields PR-AUC 1.0",
+    "F3913-F3915 resolution flags",
+    "F3895-F3923 post-alert block unless include_tms"
+  ],
+  "best_honest_folds_pr_auc": [0.7426, 0.7753, 0.7635, 0.7112, 0.6692],
+  "recipe": {
+    "blend": "0.6 XGB + 0.4 LGB, 500 trees, no SMOTE, no elapsed_days, no early stopping",
+    "dictionary": "V_cross, V_pos/V_net/V_cash L7, L7-L31 burst, channel entropy, UPI db/cr imbalance, occupation-relative balances F3880-F3885",
+    "also": "row moments, fold-safe cats F3886/F3889/F3891/F3892, cyclical F3888 only, IF + PCA-3 + KMeans-3"
+  }
+}
