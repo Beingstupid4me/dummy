@@ -49,6 +49,7 @@ export type SimForm = {
 };
 
 type ConsoleState = {
+  theme: "dark" | "light";
   feed: Transaction[];
   selected: Transaction;
   sel: string;
@@ -79,6 +80,7 @@ type ConsoleState = {
   toggleFeature: (id: string) => void;
   setSmote: (n: number) => void;
   startRetrain: () => void;
+  toggleTheme: () => void;
 };
 
 const Ctx = createContext<ConsoleState | null>(null);
@@ -100,6 +102,7 @@ function pushEscrow(tx: Transaction, setter: (fn: (prev: WebhookEvent[]) => Webh
 }
 
 export function ConsoleProvider({ children }: { children: ReactNode }) {
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [feed, setFeed] = useState<Transaction[]>(SEED_FEED);
   const [sel, setSel] = useState(SEED_FEED[SEED_FEED.length - 1].id);
   const [model, setModel] = useState<ModelId>("M1");
@@ -122,6 +125,33 @@ export function ConsoleProvider({ children }: { children: ReactNode }) {
   const [apiLive, setApiLive] = useState(false);
   const apiLiveRef = useRef(false);
   const mockI = useRef(SEED_FEED.length);
+
+  useEffect(() => {
+    try {
+      const savedTheme = localStorage.getItem("sf_theme") as "dark" | "light" | null;
+      if (savedTheme === "light" || savedTheme === "dark") {
+        setTheme(savedTheme);
+        document.documentElement.setAttribute("data-theme", savedTheme);
+      } else {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => {
+      const next = prev === "dark" ? "light" : "dark";
+      try {
+        localStorage.setItem("sf_theme", next);
+        document.documentElement.setAttribute("data-theme", next);
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }, []);
 
   const selected = useMemo(
     () => feed.find((t) => t.id === sel) ?? feed[feed.length - 1],
@@ -168,6 +198,20 @@ export function ConsoleProvider({ children }: { children: ReactNode }) {
           setModels(cards);
           const act = cards.find((c) => (c as ModelCard & { active?: boolean }).active);
           if (act?.id) setModel(act.id);
+        }
+        // Fetch live gov tickets from backend
+        try {
+          const { fetchGovTickets, fetchEscrowWebhooks } = await import("@/lib/api");
+          const govTickets = await fetchGovTickets();
+          if (!cancelled && Array.isArray(govTickets) && govTickets.length) {
+            setGov(govTickets);
+          }
+          const hooksList = await fetchEscrowWebhooks();
+          if (!cancelled && Array.isArray(hooksList) && hooksList.length) {
+            setHooks(hooksList);
+          }
+        } catch {
+          /* fallback to seeds */
         }
       } catch {
         if (!cancelled) {
@@ -280,42 +324,86 @@ export function ConsoleProvider({ children }: { children: ReactNode }) {
     if (apiLiveRef.current) {
       void (async () => {
         try {
+          const featuresOn = toggles.filter((t) => t.on).map((t) => t.id);
+          const featuresOff = toggles.filter((t) => !t.on).map((t) => t.id);
           const { job_id } = await postRetrain({
+            features_on: featuresOn,
+            features_off: featuresOff,
             include_elapsed: toggles.some((t) => t.id === "elapsed" && t.on),
             include_leaky: leakyOn,
+            include_tms: toggles.some((t) => t.id === "tms" && t.on),
             smote_ratio: smote,
           });
           setLog([`HTTP 202  POST /retrain  ${job_id}`, "90-day label-delay buffer applied", smoteLine]);
-          const t0 = performance.now();
-          const poll = window.setInterval(() => {
-            void (async () => {
+          
+          // Connect to SSE stream for live retrain progress
+          let retrainES: EventSource | null = null;
+          try {
+            retrainES = new EventSource(`${API_BASE}/retrain/${job_id}/stream`);
+            retrainES.onmessage = (ev) => {
               try {
-                const st = await retrainStatus(job_id);
-                if (st.log?.length) setLog(st.log);
-                if (["done", "aborted", "error"].includes(st.status)) {
-                  window.clearInterval(poll);
-                  setRetrain(st.status === "done" ? "done" : "idle");
-                  if (st.status === "done") {
+                const data = JSON.parse(ev.data);
+                if (data.line) {
+                  setLog((prev) => [...prev, data.line]);
+                }
+                if (data.done || ["done", "aborted", "error"].includes(data.status)) {
+                  retrainES?.close();
+                  setRetrain(data.status === "done" ? "done" : "idle");
+                  if (data.status === "done") {
                     setToast("M4 registered · 0 ms cutover");
-                    const cards = await fetchRegistry();
-                    setModels(cards);
-                    setModel("M4");
+                    void fetchRegistry().then((cards) => {
+                      setModels(cards);
+                      setModel("M4");
+                    });
                   } else {
-                    setToast(`Retrain ${st.status}`);
+                    setToast(`Retrain ${data.status}`);
                   }
                 }
-                if ((performance.now() - t0) / 1000 > 240) {
-                  window.clearInterval(poll);
-                  setLog((prev) => [...prev, "still running in worker — check GET /retrain/{id}"]);
-                  setRetrain("idle");
-                }
               } catch {
-                window.clearInterval(poll);
-                setRetrain("idle");
-                setToast("Retrain poll failed");
+                /* ignore */
               }
-            })();
-          }, 1600);
+            };
+            retrainES.onerror = () => {
+              retrainES?.close();
+              // fallback to polling if SSE drops
+              startPollingFallback(job_id);
+            };
+          } catch {
+            startPollingFallback(job_id);
+          }
+
+          function startPollingFallback(id: string) {
+            const t0 = performance.now();
+            const poll = window.setInterval(() => {
+              void (async () => {
+                try {
+                  const st = await retrainStatus(id);
+                  if (st.log?.length) setLog(st.log);
+                  if (["done", "aborted", "error"].includes(st.status)) {
+                    window.clearInterval(poll);
+                    setRetrain(st.status === "done" ? "done" : "idle");
+                    if (st.status === "done") {
+                      setToast("M4 registered · 0 ms cutover");
+                      const cards = await fetchRegistry();
+                      setModels(cards);
+                      setModel("M4");
+                    } else {
+                      setToast(`Retrain ${st.status}`);
+                    }
+                  }
+                  if ((performance.now() - t0) / 1000 > 240) {
+                    window.clearInterval(poll);
+                    setLog((prev) => [...prev, "still running in worker — check GET /retrain/{id}"]);
+                    setRetrain("idle");
+                  }
+                } catch {
+                  window.clearInterval(poll);
+                  setRetrain("idle");
+                  setToast("Retrain poll failed");
+                }
+              })();
+            }, 1600);
+          }
         } catch {
           setLog((prev) => [...prev, "API /retrain failed · demo playback"]);
           setRetrain("idle");
@@ -371,6 +459,7 @@ export function ConsoleProvider({ children }: { children: ReactNode }) {
   }, [leakyOn, retrain, smote, toggles]);
 
   const value: ConsoleState = {
+    theme,
     feed,
     selected,
     sel,
@@ -401,6 +490,7 @@ export function ConsoleProvider({ children }: { children: ReactNode }) {
     toggleFeature,
     setSmote,
     startRetrain,
+    toggleTheme,
   };
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

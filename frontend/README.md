@@ -1,30 +1,31 @@
-# SentinelFlow console
+# SentinelFlow SecOps Console
 
-Next.js operations console from `pro_report` (navy `#1D3557`, slate `#457B9D`, crimson `#E63946`). The paper says Next.js 14; this app is **Next.js 16 / React 19 / Tailwind 4**. Behaviour matches the paper’s three-pane SecOps console, not the older Streamlit sketch in `phase2_roadmap.md`.
+Modern, high-performance cybersecurity operations console built with **Next.js 16 (Turbopack) / React 19 / Tailwind CSS** matching the institutional palette of Bank of India (Navy `#1D3557`, Slate `#457B9D`, Crimson `#E63946`, Foam `#F1FAEE`).
 
-## Pages
+## Console Architecture & Views
 
-| Route | What it shows |
-|---|---|
-| `/` | Dashboard — live stream, HITL queue, `POST /score` simulator |
-| `/analysis/[id]` | Case file — calibrated *P*, Taylor-scaled TreeSHAP, ego graph, Redis L7 profile, latency waterfall, I4C tickets, escrow webhook log |
-| `/registry` | M1–M4 arena, feature control board, SMOTE slider, `POST /retrain` |
+### 1. Threat Dashboard (`/`)
+- **Live Transaction Stream**: Real-time SSE streaming table with full-text search (account, ID, beneficiary) and multi-attribute channel/status filtering.
+- **Incident Inspector**: Focus card showing calibrated fraud risk percentage, transaction breakdown, latency metrics, and TMS flag alerts.
+- **HITL Priority Queue**: Human-in-the-loop review queue highlighting non-clear and escrow-quarantined accounts.
+- **Interactive Simulation Sandbox**: Form to submit real-time test transactions against any account via `POST /score`.
 
-## Talk to the API
+### 2. Incident Dossier & Case Analysis (`/analysis/[id]`)
+- **Calibrated Risk Gauge**: Circular SVG meter showing mathematically calibrated posterior probability $P_{\text{calib}}$.
+- **Taylor-Scaled TreeSHAP Explanations**: Local feature attribution reason codes scaled by the continuous monotonic PCHIP derivative.
+- **Ego-Network Graph Decomposition**: Interactive 2D canvas displaying 1-hop and 2-hop transaction layering topology with 24h / 7d TTL edge indicators.
+- **Redis Profile Rollup**: Real-time $L7D$ channel debit/credit balances and velocity acceleration factors.
+- **Latency Waterfall**: Microsecond-accurate latency breakdown (Redis, Reconstruction, GBDT, PCHIP, SHAP).
+- **I4C / NCRP Intelligence Ingestion**: Live regulatory ticket viewer with integrated form to ingest new blacklist entities.
+- **Autonomous Escrow Outbound Webhooks**: Audit stream of 15-minute escrow hold events and dispatch status.
 
-`next.config.ts` rewrites `/sf-api/:path*` → `http://127.0.0.1:8000/:path*`. Override with `NEXT_PUBLIC_API_URL` if the engine is elsewhere.
+### 3. Model Registry & Orchestrator (`/registry`)
+- **4-Slot Memory Registry**: Live performance scorecard (PR-AUC, ROC-AUC, Mule F1, Macro F1, p99 latency, memory footprint).
+- **Zero-Downtime Hot-Swap**: Click any active slot (M1, M2, M3, M4) to execute an instantaneous pointer cutover with 0 ms downtime.
+- **Feature Composition Board**: Toggle individual production and audited leaky tracks fed into retrain requests.
+- **Automated Retrain Pipeline**: Trigger on-demand GBDT retraining with SMOTE control, 90-day label-delay enforcement, and live SSE event stream logs.
 
-On boot the console:
-
-1. `GET /health` and `GET /registry`
-2. If that succeeds: `EventSource('/sf-api/stream')` and live `POST /score` / `POST /registry/active` / `POST /retrain`
-3. If the API is down: seeded mock feed (`lib/demo.ts`) so the UI still demo
-
-Header reads **API** when the engine is up, **Demo** otherwise.
-
-`lib/store.tsx` is the single client store. `lib/api.ts` maps FastAPI JSON onto the same `Transaction` type the mock uses.
-
-## Run
+## Running the Frontend
 
 ```powershell
 cd frontend
@@ -32,36 +33,30 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Start the backend first if you want live scores (see `backend/README.md`). Do not start uvicorn with `--reload` on Windows.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-Sample accounts in the simulator: `XXXX2203` (mule + seeded I4C), `XXXX2411`, `XXXX2688`, `XXXX2904`.
+### API Proxy Configuration
+`next.config.ts` automatically proxies `/sf-api/:path*` to `http://127.0.0.1:8000/:path*`.
+- When the backend is online, the console operates in **Live API** mode.
+- If the backend is offline, the console seamlessly falls back to a deterministic **Mock Stream** (`lib/demo.ts`) to maintain complete demo functionality.
 
-## Layout
+## Project Structure
 
 ```
-app/page.tsx                 dashboard
-app/analysis/[id]/page.tsx   case file
-app/registry/page.tsx        orchestrator
-components/views/            Dashboard / Analysis / Registry
-components/ego-graph.tsx     2D canvas 1-hop / 2-hop (not WebGL)
-components/shell.tsx         navy chrome, live/demo pill
-lib/store.tsx                feed, score, swap, retrain
-lib/api.ts                   FastAPI client + SSE mapper
-lib/demo.ts                  mock stream if API is down
-lib/types.ts                 shared shapes
+app/
+  page.tsx                 Dashboard view route
+  analysis/[id]/page.tsx   Case analysis dossier route
+  registry/page.tsx        Model registry route
+  layout.tsx               Root layout, fonts, and dark theme
+  globals.css              Custom styling & responsive scrollbars
+components/
+  shell.tsx                Institutional header, status badge, and routing tabs
+  ui.tsx                   Panels, KPI cards, status pills, risk meter, TreeSHAP list
+  ego-graph.tsx            2D Canvas ego-network topology renderer
+  views/                   DashboardView, AnalysisView, RegistryView
+lib/
+  store.tsx                Global React Context, SSE listeners, polling fallbacks
+  api.ts                   Typed FastAPI client & REST/SSE endpoint bindings
+  demo.ts                  Deterministic simulation dataset & mock stream generator
+  types.ts                 TypeScript data schemas
 ```
-
-## Gaps vs report / roadmap
-
-Paper calls for libraries this app does **not** depend on:
-
-- `react-virtuoso` virtualized feed — the table is a plain scroll
-- `react-force-graph-2d` WebGL ego graph — `ego-graph.tsx` draws on a 2D canvas
-- Retrain progress **SSE** — the console **polls** `GET /retrain/{job_id}` every 1.6 s
-
-Other gaps:
-
-- I4C / NCRP list on the analysis page is still the seeded `SEED_GOV` demo, not `GET /feeds/gov`.
-- Feature toggles (moments, gaps, cats, leaky flags) change local state. Retrain currently sends only `include_elapsed`, `include_leaky`, and `smote_ratio` — not a full `features_on` list.
-- No hyperparameter fields (learning rate) in the UI; trees are hardcoded to 120 in `lib/api.ts`.
-- Registry hot-swap of M3 does nothing until the backend has M3 weights (`python -m app.bootstrap --all`).

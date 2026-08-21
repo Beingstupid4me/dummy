@@ -4,13 +4,53 @@
   --navy: #1d3557;
   --navy-deep: #0b1524;
   --navy-mid: #12233a;
-  --slate: #457b9d;
+  --slate: #7ea3bb;
+  --slate-dark: #457b9d;
   --crimson: #e63946;
   --foam: #f1faee;
   --paper: #e8eef5;
   --line: rgba(69, 123, 157, 0.26);
   --good: #2a9d8f;
   --warn: #e9c46a;
+
+  --bg-app: #0b1524;
+  --bg-panel: rgba(14, 26, 44, 0.85);
+  --bg-card: #0a1320;
+  --bg-header: #0e1a2c;
+  --bg-input: rgba(11, 21, 36, 0.75);
+  --bg-chip: #0b1524;
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --text-primary: #f1faee;
+  --text-secondary: #7ea3bb;
+  --text-muted: #457b9d;
+  --shadow-card: inset 0 1px 0 rgba(241, 250, 238, 0.035);
+}
+
+:root[data-theme="light"],
+html[data-theme="light"] {
+  --navy: #1d3557;
+  --navy-deep: #f1f5f9;
+  --navy-mid: #e2e8f0;
+  --slate: #334155;
+  --slate-dark: #1e293b;
+  --crimson: #dc2626;
+  --foam: #0f172a;
+  --paper: #ffffff;
+  --line: #cbd5e1;
+  --good: #059669;
+  --warn: #d97706;
+
+  --bg-app: #f8fafc;
+  --bg-panel: #ffffff;
+  --bg-card: #f8fafc;
+  --bg-header: #f1f5f9;
+  --bg-input: #ffffff;
+  --bg-chip: #e2e8f0;
+  --border-subtle: rgba(0, 0, 0, 0.07);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 @theme inline {
@@ -34,8 +74,9 @@
 html,
 body {
   height: 100%;
-  background: var(--navy-deep);
-  color: var(--foam);
+  background: var(--bg-app);
+  color: var(--text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 body {
@@ -44,6 +85,12 @@ body {
   background-image:
     radial-gradient(900px 420px at 0% -20%, rgba(69, 123, 157, 0.16), transparent 50%),
     linear-gradient(180deg, #0b1524 0%, #0c1829 100%);
+}
+
+:root[data-theme="light"] body {
+  background-image:
+    radial-gradient(900px 420px at 0% -20%, rgba(69, 123, 157, 0.08), transparent 50%),
+    linear-gradient(180deg, #f8fafc 0%, #eef2f6 100%);
 }
 
 button,
@@ -64,13 +111,14 @@ button {
 
 .sf-panel {
   border: 1px solid var(--line);
-  background: rgba(14, 26, 44, 0.78);
-  box-shadow: inset 0 1px 0 rgba(241, 250, 238, 0.035);
+  background: var(--bg-panel);
+  box-shadow: var(--shadow-card);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .sf-kicker {
   font-size: 10px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--slate);
@@ -80,12 +128,13 @@ button {
 .sf-select {
   width: 100%;
   border: 1px solid var(--line);
-  background: rgba(11, 21, 36, 0.7);
-  color: var(--foam);
+  background: var(--bg-input);
+  color: var(--text-primary);
   border-radius: 6px;
   padding: 8px 10px;
   font-size: 13px;
   outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
 }
 
 .sf-input:focus,
@@ -96,8 +145,8 @@ button {
 
 .sf-select {
   appearance: none;
-  background-image: linear-gradient(45deg, transparent 50%, #7ea3bb 50%),
-    linear-gradient(135deg, #7ea3bb 50%, transparent 50%);
+  background-image: linear-gradient(45deg, transparent 50%, var(--slate) 50%),
+    linear-gradient(135deg, var(--slate) 50%, transparent 50%);
   background-position:
     calc(100% - 14px) 55%,
     calc(100% - 9px) 55%;
@@ -134,6 +183,9 @@ button {
 
 .sf-toast {
   animation: sfToast 180ms ease-out;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  color: var(--text-primary);
 }
 
 ::-webkit-scrollbar {
@@ -141,6 +193,7 @@ button {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2c4a6b;
+  background: var(--slate);
+  opacity: 0.5;
   border-radius: 99px;
 }

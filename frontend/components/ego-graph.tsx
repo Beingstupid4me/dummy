@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useConsole } from "@/lib/store";
 import type { Transaction } from "@/lib/types";
 
 export function EgoGraph({ tx, className = "h-[240px]" }: { tx: Transaction; className?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
+  const { theme } = useConsole();
 
   useEffect(() => {
     const canvas = ref.current;
@@ -18,6 +20,8 @@ export function EgoGraph({ tx, className = "h-[240px]" }: { tx: Transaction; cla
     canvas.width = w * dpr;
     canvas.height = h * dpr;
     ctx.scale(dpr, dpr);
+
+    const isLight = theme === "light";
 
     const nodes = tx.graph.nodes.map((n) => {
       const ring = n.kind === "ego" ? 0 : n.kind === "hop1" ? 1 : 2;
@@ -41,8 +45,15 @@ export function EgoGraph({ tx, className = "h-[240px]" }: { tx: Transaction; cla
       const b = pos[e.to];
       if (!a || !b) continue;
       ctx.beginPath();
-      ctx.strokeStyle = e.amount > 80000 ? "rgba(230,57,70,0.55)" : "rgba(69,123,157,0.42)";
-      ctx.lineWidth = e.amount > 80000 ? 1.6 : 1;
+      ctx.strokeStyle =
+        e.amount > 80000
+          ? isLight
+            ? "rgba(220, 38, 38, 0.75)"
+            : "rgba(230, 57, 70, 0.65)"
+          : isLight
+            ? "rgba(71, 85, 105, 0.45)"
+            : "rgba(69, 123, 157, 0.45)";
+      ctx.lineWidth = e.amount > 80000 ? 1.8 : 1.1;
       ctx.setLineDash(e.ttl === "24h" ? [4, 3] : []);
       ctx.moveTo(a.x, a.y);
       ctx.lineTo(b.x, b.y);
@@ -53,30 +64,38 @@ export function EgoGraph({ tx, className = "h-[240px]" }: { tx: Transaction; cla
     for (const n of nodes) {
       const color =
         n.kind === "ego"
-          ? "#e63946"
+          ? isLight
+            ? "#dc2626"
+            : "#e63946"
           : n.kind === "blacklist"
-            ? "#e9c46a"
+            ? isLight
+              ? "#d97706"
+              : "#e9c46a"
             : n.kind === "hop1"
-              ? "#457b9d"
-              : "#7ea3bb";
+              ? isLight
+                ? "#1d3557"
+                : "#457b9d"
+              : isLight
+                ? "#64748b"
+                : "#7ea3bb";
       ctx.beginPath();
       ctx.fillStyle = color;
       ctx.arc(n.x, n.y, n.kind === "ego" ? 8 : 5, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = "#f1faee";
-      ctx.font = "10px IBM Plex Mono, ui-monospace, monospace";
+      ctx.fillStyle = isLight ? "#0f172a" : "#f1faee";
+      ctx.font = "500 10px IBM Plex Mono, ui-monospace, monospace";
       ctx.fillText(n.label, n.x + 9, n.y + 3);
     }
-  }, [tx]);
+  }, [tx, theme]);
 
   return (
     <div className={`relative w-full ${className}`}>
       <canvas ref={ref} className="h-full w-full" />
       <div className="pointer-events-none absolute bottom-1.5 left-3 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate">
-        <span className="text-crimson">● ego</span>
-        <span>● 1-hop</span>
-        <span className="text-warn">● I4C</span>
-        <span>2-hop</span>
+        <span className="text-crimson font-medium">● ego</span>
+        <span className="font-medium">● 1-hop</span>
+        <span className="text-warn font-medium">● I4C</span>
+        <span>● 2-hop</span>
         <span className="opacity-70">dashed 24h TTL · solid 7d</span>
       </div>
     </div>
