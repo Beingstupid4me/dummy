@@ -1,0 +1,186 @@
+[
+  {
+    "label": "locked_minus_post_alert",
+    "rows": [
+      {
+        "fold": 0,
+        "val_mules": 16,
+        "n_features": 157,
+        "pr_auc": 0.7381830333641839,
+        "roc_auc": 0.8905902777777778,
+        "pr_xgb": 0.756856945619958,
+        "pr_lgb": 0.7017220870462659
+      },
+      {
+        "fold": 1,
+        "val_mules": 16,
+        "n_features": 157,
+        "pr_auc": 0.7809495064383251,
+        "roc_auc": 0.8970486111111111,
+        "pr_xgb": 0.7861795000055982,
+        "pr_lgb": 0.7226008219949451
+      },
+      {
+        "fold": 2,
+        "val_mules": 13,
+        "n_features": 157,
+        "pr_auc": 0.7747858208236963,
+        "roc_auc": 0.8722641750927941,
+        "pr_xgb": 0.7914146098709273,
+        "pr_lgb": 0.701751085565871
+      },
+      {
+        "fold": 3,
+        "val_mules": 9,
+        "n_features": 157,
+        "pr_auc": 0.659219487806613,
+        "roc_auc": 0.8389850057670127,
+        "pr_xgb": 0.6864515871542808,
+        "pr_lgb": 0.6047090822743745
+      },
+      {
+        "fold": 4,
+        "val_mules": 3,
+        "n_features": 157,
+        "pr_auc": 0.6684619988031119,
+        "roc_auc": 0.8302696078431373,
+        "pr_xgb": 0.6683644595359366,
+        "pr_lgb": 0.6697916666666667
+      }
+    ],
+    "mean_pr_auc": 0.724319969447186,
+    "mean_roc_auc": 0.8658315355183666,
+    "delta_vs_locked": -0.01378003055281396,
+    "beats_locked": false,
+    "seconds": 98.6,
+    "feature_config": {
+      "selector": "variance_mi",
+      "top_mi": 25,
+      "top_gap": 25,
+      "mi_cap": 400,
+      "n_select": 60,
+      "corr_prune": 0.0,
+      "interactions": 6,
+      "use_pca_kmeans": true,
+      "use_isoforest": true,
+      "use_row_stats": true,
+      "use_cyclical": true,
+      "include_post_alert": false,
+      "semantic": false,
+      "ratio_physics": false
+    },
+    "model_config": {
+      "families": [
+        "xgb",
+        "lgb"
+      ],
+      "weights": [
+        0.6,
+        0.4
+      ],
+      "n_seeds": 1,
+      "combine": "prob",
+      "n_estimators": 500,
+      "max_depth": 5,
+      "learning_rate": 0.05,
+      "subsample": 0.8,
+      "colsample": 0.8,
+      "min_child_weight": 1.0,
+      "reg_lambda": 1.0,
+      "num_leaves": 31,
+      "spw_power": 1.0
+    }
+  },
+  {
+    "label": "locked_repro",
+    "rows": [
+      {
+        "fold": 0,
+        "val_mules": 16,
+        "n_features": 157,
+        "pr_auc": 0.7381830333641839,
+        "roc_auc": 0.8905902777777778,
+        "pr_xgb": 0.756856945619958,
+        "pr_lgb": 0.7017220870462659
+      },
+      {
+        "fold": 1,
+        "val_mules": 16,
+        "n_features": 157,
+        "pr_auc": 0.7809495064383251,
+        "roc_auc": 0.8970486111111111,
+        "pr_xgb": 0.7861795000055982,
+        "pr_lgb": 0.7226008219949451
+      },
+      {
+        "fold": 2,
+        "val_mules": 13,
+        "n_features": 157,
+        "pr_auc": 0.7747858208236963,
+        "roc_auc": 0.8722641750927941,
+        "pr_xgb": 0.7914146098709273,
+        "pr_lgb": 0.701751085565871
+      },
+      {
+        "fold": 3,
+        "val_mules": 9,
+        "n_features": 157,
+        "pr_auc": 0.6592148936869434,
+        "roc_auc": 0.8385236447520185,
+        "pr_xgb": 0.6864515871542808,
+        "pr_lgb": 0.6013014436903693
+      },
+      {
+        "fold": 4,
+        "val_mules": 3,
+        "n_features": 157,
+        "pr_auc": 0.6684619988031119,
+        "roc_auc": 0.8302696078431373,
+        "pr_xgb": 0.6683644595359366,
+        "pr_lgb": 0.6697916666666667
+      }
+    ],
+    "mean_pr_auc": 0.7243190506232521,
+    "mean_roc_auc": 0.8657392633153677,
+    "delta_vs_locked": -0.013780949376747897,
+    "beats_locked": false,
+    "seconds": 148.6,
+    "feature_config": {
+      "selector": "variance_mi",
+      "top_mi": 25,
+      "top_gap": 25,
+      "mi_cap": 400,
+      "n_select": 60,
+      "corr_prune": 0.0,
+      "interactions": 6,
+      "use_pca_kmeans": true,
+      "use_isoforest": true,
+      "use_row_stats": true,
+      "use_cyclical": true,
+      "include_post_alert": true,
+      "semantic": false,
+      "ratio_physics": false
+    },
+    "model_config": {
+      "families": [
+        "xgb",
+        "lgb"
+      ],
+      "weights": [
+        0.6,
+        0.4
+      ],
+      "n_seeds": 1,
+      "combine": "prob",
+      "n_estimators": 500,
+      "max_depth": 5,
+      "learning_rate": 0.05,
+      "subsample": 0.8,
+      "colsample": 0.8,
+      "min_child_weight": 1.0,
+      "reg_lambda": 1.0,
+      "num_leaves": 31,
+      "spw_power": 1.0
+    }
+  }
+]
