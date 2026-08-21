@@ -1,0 +1,24 @@
+{
+  "n_samples": 2000,
+  "wall_time_seconds": 32.88,
+  "throughput_rps": 60.8,
+  "latency_ms": {
+    "mean": 16.31,
+    "std": 7.42,
+    "min": 8.92,
+    "p50": 14.53,
+    "p90": 21.24,
+    "p95": 34.21,
+    "p99": 46.86,
+    "p99_9": 53.56,
+    "max": 122.78
+  },
+  "component_p50_ms": {
+    "redis_lookup": 0.005,
+    "reconstruction": 1.953,
+    "gbdt_blend": 8.397,
+    "pchip_calib": 0.332,
+    "shap_explanation": 0.0
+  },
+  "sla_passed": true
+}

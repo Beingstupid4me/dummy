@@ -24,6 +24,7 @@ class Settings:
     shap_min_p = 0.32
     label_delay_days = 90
     retrain_seconds_sla = 15.0
+    escrow_webhook_url = os.environ.get("SF_ESCROW_WEBHOOK_URL", "")
 
 
 @lru_cache

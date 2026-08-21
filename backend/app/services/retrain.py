@@ -44,16 +44,23 @@ def _run(job_id: str, req: RetrainRequest) -> None:
             _append(job_id, f"SMOTE ratio {req.smote_ratio:.2f} · minority upsample")
         else:
             _append(job_id, "SMOTE skipped · scale_pos_weight")
-        spec = FeatureSpec(
-            include_elapsed=req.include_elapsed or "elapsed" in req.features_on,
-            include_leaky=req.include_leaky
-            or any(x in req.features_on for x in ("F3912", "F2230", "F3886", "F3889", "F3891", "F3892")),
-            include_tms=req.include_tms,
+        use_pca = not any(x in req.features_off for x in ("pca", "pca_kmeans", "feature_pc"))
+        include_elapsed = req.include_elapsed or any(x in req.features_on for x in ("elapsed", "elapsed_days"))
+        include_leaky = req.include_leaky or any(
+            x in req.features_on for x in ("F3912", "F2230", "F3886", "F3889", "F3891", "F3892", "leaky")
         )
-        if req.include_leaky:
+        include_tms = req.include_tms or any(x in req.features_on for x in ("tms", "tms_flags"))
+
+        spec = FeatureSpec(
+            include_elapsed=include_elapsed,
+            include_leaky=include_leaky,
+            include_tms=include_tms,
+            use_pca=use_pca,
+        )
+        if req.include_leaky or include_leaky:
             _append(job_id, "Leaky tracks included — demo only")
         else:
-            _append(job_id, "Feature reconstruction · moments / TE / V_cross")
+            _append(job_id, f"Feature reconstruction · moments / TE / V_cross · PCA={use_pca}")
         n_est = int(req.n_estimators)
         hp = {"n_estimators": n_est}
         if req.learning_rate:

@@ -17,6 +17,55 @@ from app.services.graph import ego_graph
 from app.services.gov import is_blacklisted, seed_tickets
 from app.services.registry import get_registry
 from app.services.store import TTL_24H, get_store
+from app.services.webhook import record_and_dispatch_webhook
+
+_TMS_MAP = {
+    "F3900": "HIGH_VALUE_UPI_DB_TXNS",
+    "F3901": "MULTI_DBS_FROM_ACCOUNT",
+    "F3902": "MULTI_PG_TXNS",
+    "F3903": "PWD_CHANGED_LARGE_FUND_XFERS",
+    "F3904": "RCVING_FUNDS_FROM_MULITPLE_USERS",
+    "F3905": "RISKY_COUNTRY_TXNS",
+    "F3906": "STATUS_CHANGE_AFTER_WD",
+    "F3907": "TXN_AT_UNUSUAL_TIME",
+    "F3908": "MULTI_UPI_DB_TXNS",
+    "F3909": "FAILED_UPI_TXNS",
+    "F3910": "ONE_TO_MANY_UPI_PAYMENTS",
+    "F3911": "OTHER_ALERT_TYPES",
+    "F3916": "L3_FLG",
+    "F3917": "L2_FLG",
+    "F3918": "L1_FLG",
+    "F3919": "COUNT_ALERTS",
+}
+
+
+def evaluate_tms_flags(req: ScoreRequest, idx: int, profile: RedisProfile) -> list[str]:
+    """Evaluate TMS rules from historical indicators and real-time transaction telemetry."""
+    flags: list[str] = []
+    try:
+        w = context().work.iloc[idx]
+        for col, label in _TMS_MAP.items():
+            if col in w.index and pd.notna(w[col]):
+                try:
+                    val = float(w[col])
+                    if val > 0 and label not in flags:
+                        flags.append(label)
+                except (ValueError, TypeError):
+                    pass
+    except Exception:  # noqa: BLE001
+        pass
+
+    # Real-time event rules
+    if req.channel == "UPI" and req.amount >= 100000 and "HIGH_VALUE_UPI_DB_TXNS" not in flags:
+        flags.append("HIGH_VALUE_UPI_DB_TXNS")
+    if req.amount >= 200000 and "LARGE_FUND_XFERS" not in flags:
+        flags.append("LARGE_FUND_XFERS")
+    if profile.accel >= 4.5 and "RAPID_TXN_BURST" not in flags:
+        flags.append("RAPID_TXN_BURST")
+    if profile.vCross >= 3.5 and "CROSS_CHANNEL_PASS_THROUGH" not in flags:
+        flags.append("CROSS_CHANNEL_PASS_THROUGH")
+
+    return flags
 
 _ctx: DatasetContext | None = None
 _X: dict[str, pd.DataFrame] = {}
@@ -187,7 +236,7 @@ def score(req: ScoreRequest) -> ScoreResponse:
     calib = float(apply_pchip(np.array([raw]), bundle.pchip_x, bundle.pchip_y)[0])
     pchip_ms = (time.perf_counter() - t_pchip) * 1000
 
-    tms = []
+    tms = evaluate_tms_flags(req, idx, profile)
     shap_ms = 0.0
     shap_bars = []
     if calib >= get_settings().shap_min_p:
@@ -201,10 +250,12 @@ def score(req: ScoreRequest) -> ScoreResponse:
     graph = ego_graph(account, req.amount, req.channel, gov_hit)
     tx_id = f"TX-{uuid.uuid4().hex[:8].upper()}"
     if st == "ESCROW":
-        store.set(
-            f"webhook:{tx_id}",
-            {"txId": tx_id, "holdMin": get_settings().escrow_minutes, "endpoint": "POST /webhooks/escrow"},
-            TTL_24H,
+        record_and_dispatch_webhook(
+            tx_id=tx_id,
+            account=account,
+            amount=req.amount,
+            channel=req.channel,
+            hold_min=get_settings().escrow_minutes,
         )
     total = (time.perf_counter() - t0) * 1000
     return ScoreResponse(

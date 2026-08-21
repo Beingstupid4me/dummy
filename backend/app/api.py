@@ -18,6 +18,7 @@ from app.services.gov import ingest_ticket, list_tickets
 from app.services.registry import get_registry
 from app.services.retrain import get_job, submit
 from app.services.store import get_store
+from app.services.webhook import list_escrow_webhooks
 
 router = APIRouter()
 
@@ -70,6 +71,46 @@ def retrain_status(job_id: str):
     return job
 
 
+@router.get("/retrain/{job_id}/stream")
+async def retrain_stream(job_id: str):
+    """SSE streaming of retrain job logs in real time."""
+    job = get_job(job_id)
+    if job is None:
+        raise HTTPException(404, "unknown job")
+
+    async def gen():
+        last_idx = 0
+        while True:
+            current_job = get_job(job_id)
+            if current_job is None:
+                break
+            if len(current_job.log) > last_idx:
+                for line in current_job.log[last_idx:]:
+                    payload = {
+                        "job_id": job_id,
+                        "status": current_job.status,
+                        "line": line,
+                        "metrics": current_job.metrics,
+                        "elapsed_s": current_job.elapsed_s,
+                    }
+                    yield f"data: {json.dumps(payload, default=str)}\n\n"
+                last_idx = len(current_job.log)
+
+            if current_job.status in ("done", "aborted", "error"):
+                done_payload = {
+                    "job_id": job_id,
+                    "status": current_job.status,
+                    "metrics": current_job.metrics,
+                    "elapsed_s": current_job.elapsed_s,
+                    "done": True,
+                }
+                yield f"data: {json.dumps(done_payload, default=str)}\n\n"
+                break
+            await asyncio.sleep(0.3)
+
+    return StreamingResponse(gen(), media_type="text/event-stream")
+
+
 @router.post("/feeds/gov")
 def post_gov(ticket: GovTicket):
     ingest_ticket(ticket)
@@ -83,9 +124,7 @@ def get_gov():
 
 @router.get("/webhooks/escrow")
 def list_webhooks():
-    store = get_store()
-    keys = store.keys("webhook:")
-    return [store.get(k) for k in keys]
+    return list_escrow_webhooks()
 
 
 @router.get("/stream")
